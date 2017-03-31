@@ -1,0 +1,112 @@
+
+import android.graphics.Color;
+import android.os.Build;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
+/**
+ * 使用注意要点：
+ * 1、在AndroidManifest中开启赢家加速，设置activity属性android:hardwareAccelerated="true"
+ * 2、设置webview的硬件加速，android:layerType="hardware"
+ * 3、设置AndroidManifest:<supports-screens
+                            android:anyDensity="true"
+                            android:largeScreens="true"
+                            android:normalScreens="true"
+                            android:resizeable="true"
+                            android:smallScreens="true" />
+ */
+
+public class WebviewActivity extends AppCompatActivity {
+
+    @Bind(R.id.webview)
+    WebView webview;
+
+    private int mPressBackCount;
+    private long mPressBackTime;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
+        setUpWebViewDefaults(webview);
+        webview.loadUrl("url");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        mPressBackCount++;
+        if (mPressBackCount >= 2 && System.currentTimeMillis() < mPressBackTime + 2000) {
+            System.exit(0);
+//            super.onBackPressed();
+        } else {
+            mPressBackCount = 1;
+            mPressBackTime = System.currentTimeMillis();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (webview != null) {
+            webview.removeAllViews();
+            webview.destroy();
+            webview = null;
+        }
+    }
+
+    private void setUpWebViewDefaults(WebView webView) {
+        WebSettings settings = webView.getSettings();
+
+        // Enable Javascript
+        settings.setJavaScriptEnabled(true);
+
+        // Use WideViewport and Zoom out if there is no viewport defined
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+
+        // Enable pinch to zoom without the zoom buttons
+        settings.setBuiltInZoomControls(true);
+
+        // Allow use of Local Storage
+        settings.setDomStorageEnabled(true);
+
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.HONEYCOMB) {
+            // Hide the zoom controls for HONEYCOMB+
+            settings.setDisplayZoomControls(false);
+        }
+
+        // Enable remote debugging via chrome://inspect
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            settings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
+
+        webView.setWebViewClient(new WebViewClient());
+    }
+    
+   
+}
+
+    
