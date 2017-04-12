@@ -1,0 +1,54 @@
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Paint;
+import android.support.annotation.ColorInt;
+import android.support.annotation.DrawableRes;
+
+/**
+ * 图片颜色修改工具
+ * 适应于多主题
+ * */
+public class ViewUtils {
+
+    private static final String tag = ViewUtils.class.getSimpleName();
+
+    private static float[] changeColorToColorMatrix(int color) {
+        int b = color & 0xff;
+        int g = (color >>> 8) & (0xff);
+        int r = (color >>> 16) & (0xff);
+        int a = (color >>> 24) & (0xff);
+        return new float[] {
+                r * 1.0f / 255, 0, 0, 0, 0,
+                0, g * 1.0f / 255, 0, 0, 0,
+                0, 0, b * 1.0f / 255, 0, 0,
+                0, 0, 0, a * 1.0f / 255, 0
+        };
+    }
+
+    public static Bitmap changeBitmapColor(Resources res，@DrawableRes int sourceBitmapRes, @ColorInt int color) {
+        Bitmap sourceBitmap = BitmapFactory.decodeResource(res,sourceBitmapRes);
+        Bitmap resultBitmap = changeBitmapColor(sourceBitmap, color);
+        if (!sourceBitmap.isRecycled()) {
+            sourceBitmap.recycle();
+        }
+        return resultBitmap;
+    }
+
+    public static Bitmap changeBitmapColor(Bitmap sourceBitmap, @ColorInt int color) {
+        Bitmap resultBitmap = Bitmap.createBitmap(sourceBitmap, 0, 0,
+                sourceBitmap.getWidth() - 1, sourceBitmap.getHeight() - 1);
+        Paint p = new Paint();
+        ColorFilter filter = new ColorMatrixColorFilter(changeColorToColorMatrix(color));
+        p.setColorFilter(filter);
+
+        Canvas canvas = new Canvas(resultBitmap);
+        canvas.drawBitmap(resultBitmap, 0, 0, p);
+        if (!sourceBitmap.isRecycled()) {
+            sourceBitmap.recycle();
+        }
+        return resultBitmap;
+    }
+}
