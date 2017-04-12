@@ -1,0 +1,54 @@
+import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
+
+import java.io.File;
+
+/**
+ * Created by porco on 2017/4/12.
+ */
+
+public class SysPicUtil {
+
+    //指定照片保存路径，filePath为一个临时文件，每次拍照后这个图片都会被替换
+    public static void startCamera(Activity activity, String filePath, int requestCode){
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri imageUri = Uri.fromFile(new File(filePath));
+        //指定照片保存路径（SD卡），workupload.jpg为一个临时文件，每次拍照后这个图片都会被替换
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        activity.startActivityForResult(cameraIntent, requestCode);
+    }
+
+    //指定照片保存路径，file为一个临时文件，每次拍照后这个图片都会被替换
+    public static void startCamera(Activity activity, File file, int requestCode){
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri imageUri = Uri.fromFile(file);
+        //指定照片保存路径（SD卡），workupload.jpg为一个临时文件，每次拍照后这个图片都会被替换
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        activity.startActivityForResult(cameraIntent, requestCode);
+    }
+    
+    public static void startCamera(Activity activity, int requestCode){
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);// 启动系统相机
+        activity.startActivityForResult(intent, requestCode);
+    }
+
+    public static void startGalleryForImage(Activity activity, int requestCode){
+        Intent intent1 = new Intent(Intent.ACTION_GET_CONTENT);
+        intent1.setType("image/*");
+        activity.startActivityForResult(intent1, requestCode);
+    }
+
+    public static Bitmap getBtimapFromGallery(Activity activity, Intent intent) throws Throwable{
+        Uri uri = intent.getData();
+        ContentResolver resolver = activity.getContentResolver();
+        return MediaStore.Images.Media.getBitmap(resolver, uri);
+    }
+
+    //此方法返回的图片像素不高
+    public static Bitmap getBitmapFromCamera(Intent intent){
+        return intent.getParcelableExtra("data");
+    }
